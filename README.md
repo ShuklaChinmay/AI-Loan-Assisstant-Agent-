@@ -143,17 +143,17 @@ You can deploy this project on:
 
 ### **Shivani Gupta**
 
-Python Developer | Agentic AI Developer
+Python Developer | Agentic AI Developer | 
 🔗 https://github.com/Shivani7122
 
 ### **Chinmay Shukla**
 
-Backend Developer | System Architecture | Logic Designing
+Backend Developer | System Architecture | Logic Designing | 
 🔗 https://github.com/ShuklaChinmay
 
 ### **Abhishek Singh**
 
-Backend Developer | Agentic AI Developer | Front-End Developer
+Backend Developer | Agentic AI Developer | Front-End Developer | 
 🔗 https://github.com/manatwork7756
 
 ---
