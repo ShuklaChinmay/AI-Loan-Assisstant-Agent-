@@ -1,0 +1,9 @@
+{
+  "name": "Agentic AI Dev",
+  "build": { "dockerfile": "Dockerfile" },
+  "forwardPorts": [8000, 8501, 3000],
+  "postCreateCommand": "pip install -r requirements.txt",
+  "remoteUser": "vscode",
+  "features": {},
+  "workspaceFolder": "/workspace"
+}
