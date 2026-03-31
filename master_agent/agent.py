@@ -37,9 +37,9 @@ class MasterAgent:
 
             # Step 2.2: Verification
             verification_result = self.verification_agent.run(user_data)
-
-            if not verification_result.get("verified", False):
-                return "Please complete your KYC to proceed further."
+            
+            if not verification_result.get("verified"):
+                return verification_result.get("message")
 
             # Step 2.3: Underwriting
             risk_result = self.underwriting_agent.run(user_data)
