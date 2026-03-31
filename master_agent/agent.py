@@ -43,6 +43,9 @@ class MasterAgent:
 
             # Step 2.3: Underwriting
             risk_result = self.underwriting_agent.run(user_data)
+            
+            if not risk_result.get("approved"):
+                return risk_result.get("message")
 
             # Step 2.4: Sanction
             sanction_result = self.sanction_agent.run(risk_result)
