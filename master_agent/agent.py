@@ -48,7 +48,11 @@ class MasterAgent:
                 return risk_result.get("message")
 
             # Step 2.4: Sanction
+            risk_result["loan_amount"] = user_data.get("loan_amount", 0)
+            
             sanction_result = self.sanction_agent.run(risk_result)
+            
+            return sanction_result.get("message")
 
             return sanction_result.get("message", "Your loan is being processed.")
 
