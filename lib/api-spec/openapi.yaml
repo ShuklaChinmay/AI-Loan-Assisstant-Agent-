@@ -1,22 +1,28 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: AI Loan Assistant API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
     description: Health operations
+  - name: auth
+    description: Authentication
+  - name: loans
+    description: Loan management
+  - name: chat
+    description: AI Agent chat
+  - name: admin
+    description: Admin operations
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,6 +30,387 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /auth/signup:
+    post:
+      operationId: signup
+      tags: [auth]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignupRequest"
+      responses:
+        "201":
+          description: User created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "409":
+          description: User already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/login:
+    post:
+      operationId: login
+      tags: [auth]
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthResponse"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/me:
+    get:
+      operationId: getMe
+      tags: [auth]
+      summary: Get current user
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
+        "401":
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /auth/logout:
+    post:
+      operationId: logout
+      tags: [auth]
+      summary: Logout
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /loans:
+    get:
+      operationId: listLoans
+      tags: [loans]
+      summary: List available loan products
+      responses:
+        "200":
+          description: Loan products list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanProduct"
+
+  /loans/{id}:
+    get:
+      operationId: getLoan
+      tags: [loans]
+      summary: Get loan product details
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Loan product details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanProduct"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /loans/{id}/emi:
+    post:
+      operationId: calculateEmi
+      tags: [loans]
+      summary: Calculate EMI for a loan
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EmiCalculationRequest"
+      responses:
+        "200":
+          description: EMI calculation result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmiCalculationResult"
+
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [loans]
+      summary: List user's loan applications
+      responses:
+        "200":
+          description: Applications list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanApplication"
+    post:
+      operationId: createApplication
+      tags: [loans]
+      summary: Create a loan application
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateApplicationRequest"
+      responses:
+        "201":
+          description: Application created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+
+  /applications/{id}:
+    get:
+      operationId: getApplication
+      tags: [loans]
+      summary: Get loan application by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Application details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /applications/{id}/status:
+    patch:
+      operationId: updateApplicationStatus
+      tags: [loans]
+      summary: Update application status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateStatusRequest"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanApplication"
+
+  /chat/message:
+    post:
+      operationId: sendChatMessage
+      tags: [chat]
+      summary: Send message to AI loan agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ChatMessageRequest"
+      responses:
+        "200":
+          description: Agent response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ChatMessageResponse"
+
+  /chat/history:
+    get:
+      operationId: getChatHistory
+      tags: [chat]
+      summary: Get chat history for current session
+      responses:
+        "200":
+          description: Chat history
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ChatMessage"
+
+  /chat/reset:
+    post:
+      operationId: resetChat
+      tags: [chat]
+      summary: Reset chat session
+      responses:
+        "200":
+          description: Chat reset
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
+  /dashboard/summary:
+    get:
+      operationId: getDashboardSummary
+      tags: [admin]
+      summary: Get dashboard summary statistics
+      responses:
+        "200":
+          description: Dashboard summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DashboardSummary"
+
+  /admin/users:
+    get:
+      operationId: listUsers
+      tags: [admin]
+      summary: List all users (admin only)
+      responses:
+        "200":
+          description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/User"
+
+  /admin/applications:
+    get:
+      operationId: listAllApplications
+      tags: [admin]
+      summary: List all applications (admin only)
+      responses:
+        "200":
+          description: All applications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/LoanApplication"
+
+  /admin/loans:
+    post:
+      operationId: createLoanProduct
+      tags: [admin]
+      summary: Create a new loan product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLoanProductRequest"
+      responses:
+        "201":
+          description: Loan product created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanProduct"
+
+  /admin/loans/{id}:
+    put:
+      operationId: updateLoanProduct
+      tags: [admin]
+      summary: Update a loan product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateLoanProductRequest"
+      responses:
+        "200":
+          description: Updated loan product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LoanProduct"
+    delete:
+      operationId: deleteLoanProduct
+      tags: [admin]
+      summary: Delete a loan product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuccessResponse"
+
 components:
   schemas:
     HealthStatus:
@@ -34,3 +421,466 @@ components:
       required:
         - status
 
+    ErrorResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        error:
+          type: string
+      required:
+        - message
+
+    SuccessResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        success:
+          type: boolean
+      required:
+        - message
+        - success
+
+    SignupRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+      required:
+        - name
+        - email
+        - phone
+        - password
+
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/User"
+      required:
+        - token
+        - user
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        role:
+          type: string
+          enum: [user, admin]
+        kycCompleted:
+          type: boolean
+        creditScore:
+          type: integer
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - email
+        - phone
+        - role
+        - kycCompleted
+        - createdAt
+
+    LoanProduct:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        type:
+          type: string
+          enum: [home, personal, business, education, vehicle, gold]
+        description:
+          type: string
+        minAmount:
+          type: number
+        maxAmount:
+          type: number
+        minTenureMonths:
+          type: integer
+        maxTenureMonths:
+          type: integer
+        baseInterestRate:
+          type: number
+        processingFeePercent:
+          type: number
+        eligibilityCriteria:
+          type: array
+          items:
+            type: string
+        documentsRequired:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - name
+        - type
+        - description
+        - minAmount
+        - maxAmount
+        - minTenureMonths
+        - maxTenureMonths
+        - baseInterestRate
+        - processingFeePercent
+        - eligibilityCriteria
+        - documentsRequired
+        - isActive
+        - createdAt
+
+    EmiCalculationRequest:
+      type: object
+      properties:
+        loanAmount:
+          type: number
+        tenureMonths:
+          type: integer
+        interestRate:
+          type: number
+      required:
+        - loanAmount
+        - tenureMonths
+        - interestRate
+
+    EmiCalculationResult:
+      type: object
+      properties:
+        monthlyEmi:
+          type: number
+        totalAmount:
+          type: number
+        totalInterest:
+          type: number
+        processingFee:
+          type: number
+        loanAmount:
+          type: number
+        tenureMonths:
+          type: integer
+        interestRate:
+          type: number
+      required:
+        - monthlyEmi
+        - totalAmount
+        - totalInterest
+        - processingFee
+        - loanAmount
+        - tenureMonths
+        - interestRate
+
+    LoanApplication:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        loanProductId:
+          type: integer
+        loanProductName:
+          type: string
+        loanAmount:
+          type: number
+        tenureMonths:
+          type: integer
+        monthlyEmi:
+          type: number
+        status:
+          type: string
+          enum: [pending, kyc_review, document_review, underwriting, sanctioned, rejected, locked, disbursed]
+        agentStage:
+          type: string
+          enum: [sales, verification, underwriting, sanction, locking]
+          nullable: true
+        lockingId:
+          type: string
+          nullable: true
+        creditScore:
+          type: integer
+          nullable: true
+        remarks:
+          type: string
+          nullable: true
+        applicantName:
+          type: string
+        applicantEmail:
+          type: string
+        applicantPhone:
+          type: string
+        annualIncome:
+          type: number
+          nullable: true
+        employmentType:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - userId
+        - loanProductId
+        - loanProductName
+        - loanAmount
+        - tenureMonths
+        - monthlyEmi
+        - status
+        - applicantName
+        - applicantEmail
+        - applicantPhone
+        - createdAt
+        - updatedAt
+
+    CreateApplicationRequest:
+      type: object
+      properties:
+        loanProductId:
+          type: integer
+        loanAmount:
+          type: number
+        tenureMonths:
+          type: integer
+        monthlyEmi:
+          type: number
+        annualIncome:
+          type: number
+        employmentType:
+          type: string
+      required:
+        - loanProductId
+        - loanAmount
+        - tenureMonths
+        - monthlyEmi
+
+    UpdateStatusRequest:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [pending, kyc_review, document_review, underwriting, sanctioned, rejected, locked, disbursed]
+        agentStage:
+          type: string
+          enum: [sales, verification, underwriting, sanction, locking]
+          nullable: true
+        remarks:
+          type: string
+          nullable: true
+        lockingId:
+          type: string
+          nullable: true
+      required:
+        - status
+
+    ChatMessageRequest:
+      type: object
+      properties:
+        message:
+          type: string
+        sessionId:
+          type: string
+        applicationId:
+          type: integer
+          nullable: true
+      required:
+        - message
+        - sessionId
+
+    ChatMessageResponse:
+      type: object
+      properties:
+        response:
+          type: string
+        agentType:
+          type: string
+          enum: [master, sales, verification, underwriting, sanction, locking]
+        nextStep:
+          type: string
+          nullable: true
+        options:
+          type: array
+          items:
+            type: string
+          nullable: true
+        applicationId:
+          type: integer
+          nullable: true
+        requiresAction:
+          type: string
+          nullable: true
+        sessionId:
+          type: string
+      required:
+        - response
+        - agentType
+        - sessionId
+
+    ChatMessage:
+      type: object
+      properties:
+        id:
+          type: integer
+        role:
+          type: string
+          enum: [user, assistant]
+        content:
+          type: string
+        agentType:
+          type: string
+          nullable: true
+        sessionId:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - role
+        - content
+        - sessionId
+        - createdAt
+
+    DashboardSummary:
+      type: object
+      properties:
+        totalApplications:
+          type: integer
+        pendingApplications:
+          type: integer
+        approvedApplications:
+          type: integer
+        rejectedApplications:
+          type: integer
+        totalLoanAmount:
+          type: number
+        totalUsers:
+          type: integer
+        recentApplications:
+          type: array
+          items:
+            $ref: "#/components/schemas/LoanApplication"
+        applicationsByStatus:
+          type: array
+          items:
+            $ref: "#/components/schemas/StatusCount"
+        applicationsByType:
+          type: array
+          items:
+            $ref: "#/components/schemas/TypeCount"
+      required:
+        - totalApplications
+        - pendingApplications
+        - approvedApplications
+        - rejectedApplications
+        - totalLoanAmount
+        - totalUsers
+        - recentApplications
+        - applicationsByStatus
+        - applicationsByType
+
+    StatusCount:
+      type: object
+      properties:
+        status:
+          type: string
+        count:
+          type: integer
+      required:
+        - status
+        - count
+
+    TypeCount:
+      type: object
+      properties:
+        type:
+          type: string
+        count:
+          type: integer
+      required:
+        - type
+        - count
+
+    CreateLoanProductRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        type:
+          type: string
+          enum: [home, personal, business, education, vehicle, gold]
+        description:
+          type: string
+        minAmount:
+          type: number
+        maxAmount:
+          type: number
+        minTenureMonths:
+          type: integer
+        maxTenureMonths:
+          type: integer
+        baseInterestRate:
+          type: number
+        processingFeePercent:
+          type: number
+        eligibilityCriteria:
+          type: array
+          items:
+            type: string
+        documentsRequired:
+          type: array
+          items:
+            type: string
+        isActive:
+          type: boolean
+      required:
+        - name
+        - type
+        - description
+        - minAmount
+        - maxAmount
+        - minTenureMonths
+        - maxTenureMonths
+        - baseInterestRate
+        - processingFeePercent
+        - eligibilityCriteria
+        - documentsRequired
+        - isActive

@@ -1,0 +1,31 @@
+kind = "web"
+previewPath = "/"
+title = "AI Loan Assistant"
+version = "1.0.0"
+id = "artifacts/loan-assistant"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 22732
+
+[services.development]
+run = "pnpm --filter @workspace/loan-assistant run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/loan-assistant", "run", "build" ]
+publicDir = "artifacts/loan-assistant/dist/public"
+serve = "static"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "22732"
+BASE_PATH = "/"
